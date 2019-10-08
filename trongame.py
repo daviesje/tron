@@ -17,16 +17,28 @@ startpos = np.array([[game_size[0]//4,game_size[1]//4],[3*game_size[0]//4,3*game
 startvel = np.array([[0,1],[0,-1],[1,0],[-1,0]])
 startdir = np.array(['down','up','right','left'])
 
-nbots = 4
-n_winner = 2
+nbots = 2
+n_winner = 1
 nhumans = 0
 N_dir = 8 #number of rays
-ninputs = 4*(nbots+nhumans) + N_dir
+ninputs = 6*(nbots+nhumans) + N_dir
 noutputs = 4
 startnet = None
 full_nets = True
 
 init.init_game()
+
+def reset_level(game_state,player_list,give_up,ndead):
+    #TODO: move chunk from game_loop
+    #TODO: set arguments in level class?
+    #TODO: needs access to player_list, ndead, game_state
+    return
+    
+def read_inputs(human_list,quitting,ndead,draw_game,inputs,decision,give_up):
+    #TODO: same as reset_level, move code, mind variables
+    #level and parameter class?
+    return
+
 def game_loop():
     #game layer
     best_bot = None
@@ -52,6 +64,7 @@ def game_loop():
             game_state[plyr.pos[0],plyr.pos[1]] = plyr.index
             
         init.gameDisplay.fill((255,255,255))
+        activerects = []
         while ndead < len(player_list) - 1:
             ###TICK LAYER###
 
@@ -85,10 +98,16 @@ def game_loop():
                             human_list[1].turn('right')
 
                     if event.key == pygame.K_PERIOD:
-                        if speed == 256:
+                        if speed == 128:
                             speed = 1
                         else:
-                            speed = 256
+                            speed = 128
+                            
+                    if event.key == pygame.K_COMMA:
+                        if speed == 1/128.:
+                            speed = 1
+                        else:
+                            speed = 1/128.
 
                     if event.key == pygame.K_g:
                         draw_game = not draw_game
@@ -107,7 +126,9 @@ def game_loop():
                     plyr.dead = True
                     #plyr.pos = np.array([-1,-1])
                     plyr.vel = np.array([0,0])
+                    plyr.dir = 'dead'
                     ndead += 1
+                    #giving scores as current dead players ranks them correctly
                     plyr.score = ndead
                 else:
                     game_state[plyr.pos[0],plyr.pos[1]] = plyr.index
@@ -118,7 +139,8 @@ def game_loop():
                 break
             if draw_game:
                 #init.gameDisplay.fill((255,255,255))
-                drawing.draw_game(game_state,player_list) #level & players
+                #prevrects = deepcopy(activerects)
+                drawing.draw_game_fast(game_state,player_list) #level & players
                 #if nbots > 0:
                     #drawing.draw_net(bot_list[0].net)
                 pygame.display.update()

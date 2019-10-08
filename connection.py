@@ -55,10 +55,10 @@ def look(game_state,player_list,N_dir):
         distance to nearest wall in N directions
     '''
     nplayer = len(player_list)
-    input_len = 4*nplayer + N_dir
+    input_len = player_list[0].net.looknodes
     inputs = np.zeros((nplayer,input_len))
     ppos = np.zeros((nplayer,2))
-    pvel = np.zeros((nplayer,2))
+    pdir = np.zeros((nplayer,4))
     game_size = np.array(game_state.shape)
 
     #up,down,right,left,ur,dr,ul,dl
@@ -68,7 +68,11 @@ def look(game_state,player_list,N_dir):
     #set up pos & vel arrays
     for ii,plyr in enumerate(player_list):
         ppos[ii,:] = plyr.pos
-        pvel[ii,:] = plyr.vel
+        #dead will have 0 for all directions
+        pdir[ii,0] = int(plyr.dir == 'up')
+        pdir[ii,1] = int(plyr.dir == 'down')
+        pdir[ii,2] = int(plyr.dir == 'left')
+        pdir[ii,3] = int(plyr.dir == 'right')
 
     #TODO: some serious vectorisation
     for ii,plyr in enumerate(player_list):
@@ -77,15 +81,15 @@ def look(game_state,player_list,N_dir):
             continue
         #keep current player first
         pbuf = np.roll(ppos,-ii,axis=0)
-        vbuf = np.roll(pvel,-ii,axis=0)
+        dbuf = np.roll(pdir,-ii,axis=0)
         inputs[ii,:2*nplayer] = (pbuf/game_size[None,:]).flatten()
-        inputs[ii,2*nplayer:4*nplayer] = (vbuf/game_size[None,:]).flatten()
+        inputs[ii,2*nplayer:6*nplayer] = dbuf.flatten()
 
         #for each direction, 
         for d,dir in enumerate(dir_key):
             for step in range(1,game_state.shape[0]):
                 pos = (plyr.pos + dir*step) % game_state.shape
-                inputs[ii,4*nplayer+d] = step/game_size[0]
+                inputs[ii,6*nplayer+d] = step/game_size[0]
                 if game_state[pos[0],pos[1]] != 0:
                     break
     return inputs

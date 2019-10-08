@@ -33,11 +33,34 @@ def draw_game(game_state,player_list):
     #pygame draw colors
     for ii in range(color_arr.shape[0]):
         for jj in range(color_arr.shape[1]):
-            left = ii*init.display_width//color_arr.shape[0]
-            top = jj*init.display_height//color_arr.shape[0]
+            left = ii*width
+            top = jj*height
             rect = pygame.Rect(left,top,width,height)
             color = color_arr[ii,jj]
             init.gameDisplay.fill(color,rect)
+    return
+
+def draw_game_fast(game_state,player_list):
+    width = init.display_width//game_state.shape[0]
+    height = init.display_height//game_state.shape[1]
+
+    for plyr in player_list:
+        left = plyr.pos[0]*width
+        top = plyr.pos[1]*height
+        rect = pygame.Rect(left,top,width,height)
+        left_prev = left - plyr.vel[0]*width
+        top_prev = top - plyr.vel[1]*height
+        rect_prev = pygame.Rect(left_prev,top_prev,width,height)
+        color_prev = color_key[plyr.index]
+        if plyr.dead:
+            color = np.array([0,0,0])
+        else:
+            #make actual player positions brighter
+            color = color_key[plyr.index,:] + np.array([50,50,50])
+
+        init.gameDisplay.fill(color_prev,rect_prev)
+        init.gameDisplay.fill(color,rect)
+    return
 
 def draw_net(net):
     screencen = init.display_width/2.
